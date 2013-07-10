@@ -11,19 +11,23 @@
 @implementation UIImage (RoundedImage)
 
 + (UIImage *)roundedImageWithImage:(UIImage *)image {
-    CGMutablePathRef circularPath = CGPathCreateMutable();
-    CGRect pathRect = CGRectMake(0, 0, image.size.width, image.size.height);
-    CGPathAddEllipseInRect(circularPath, NULL, pathRect);
+    if (image) {
+        CGMutablePathRef circularPath = CGPathCreateMutable();
+        CGRect pathRect = CGRectMake(0, 0, image.size.width, image.size.height);
+        CGPathAddEllipseInRect(circularPath, NULL, pathRect);
+        
+        UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
+        
+        UIBezierPath *path = [UIBezierPath bezierPathWithCGPath:circularPath];
+        [path addClip];
+        [image drawAtPoint:CGPointZero];
+        UIImage *roundedImage = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        
+        return roundedImage;
+    }
     
-    UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
-    
-    UIBezierPath *path = [UIBezierPath bezierPathWithCGPath:circularPath];
-    [path addClip];
-    [image drawAtPoint:CGPointZero];
-    UIImage *roundedImage = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    return roundedImage;
+    return nil;
 }
 
 @end
