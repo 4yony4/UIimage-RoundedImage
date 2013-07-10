@@ -12,17 +12,21 @@
 
 + (UIImage *)roundedImageWithImage:(UIImage *)image {
     if (image) {
-        CGMutablePathRef circularPath = CGPathCreateMutable();
+        CGContextRef cx = CGBitmapContextCreate(NULL, image.size.width, image.size.height, CGImageGetBitsPerComponent(image.CGImage), 0, CGImageGetColorSpace(image.CGImage), CGImageGetBitmapInfo(image.CGImage));
+        
+        CGContextBeginPath(cx);
         CGRect pathRect = CGRectMake(0, 0, image.size.width, image.size.height);
-        CGPathAddEllipseInRect(circularPath, NULL, pathRect);
+        CGContextAddEllipseInRect(cx, pathRect);
+        CGContextClosePath(cx);
+        CGContextClip(cx);
         
-        UIGraphicsBeginImageContextWithOptions(image.size, NO, 0);
+        CGContextDrawImage(cx, CGRectMake(0, 0, image.size.width, image.size.height), image.CGImage);
         
-        UIBezierPath *path = [UIBezierPath bezierPathWithCGPath:circularPath];
-        [path addClip];
-        [image drawAtPoint:CGPointZero];
-        UIImage *roundedImage = UIGraphicsGetImageFromCurrentImageContext();
-        UIGraphicsEndImageContext();
+        CGImageRef clippedImage = CGBitmapContextCreateImage(cx);
+        CGContextRelease(cx);
+        
+        UIImage *roundedImage = [UIImage imageWithCGImage:clippedImage];
+        CGImageRelease(clippedImage);
         
         return roundedImage;
     }
